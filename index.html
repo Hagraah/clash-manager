@@ -62,7 +62,6 @@
     <div class="header-icon">⚔️</div>
     <div><h1>Clash Manager</h1><p>Gestion de clan Clash Royale</p></div>
   </div>
-
   <div class="screen active" id="screen-login">
     <div style="padding-top:8px;">
       <div class="card">
@@ -70,7 +69,6 @@
         <p style="font-size:13px;color:#888;margin-bottom:16px;">Entre le tag de ton clan pour voir les statistiques</p>
         <label>Tag du clan</label>
         <input type="text" id="clan-tag-input" placeholder="#ABC123" maxlength="12" />
-        <p style="font-size:11px;color:#aaa;margin-top:5px;">Trouve ton tag dans Clash Royale → Profil → Clan</p>
         <label style="margin-top:12px;">Clé API (developer.clashroyale.com)</label>
         <input type="password" id="api-key-input" placeholder="eyJ0eXAiOiJKV1Qi..." />
         <button class="search-btn" onclick="searchClan()">🔍 Rechercher le clan</button>
@@ -78,7 +76,6 @@
       <div class="alert alert-info">💡 Le tag commence toujours par <strong>#</strong>. Exemple : <strong>#2PGGCGUG</strong></div>
     </div>
   </div>
-
   <div class="screen" id="screen-loading">
     <div class="loading">
       <div class="spinner"></div>
@@ -86,7 +83,6 @@
       <p style="font-size:12px;color:#aaa;">Récupération des données du clan</p>
     </div>
   </div>
-
   <div class="screen" id="screen-dashboard">
     <div style="padding-top:8px;">
       <div id="error-container"></div>
@@ -121,7 +117,6 @@
 <script>
 const BG=['#e8f4fd','#eaf7ec','#fff8e6','#fdecea','#f0eafd','#e6faf5','#fef0e8'];
 const FG=['#1e40af','#166534','#7d4a00','#991b1b','#5b21b6','#065f46','#9a3412'];
-const PROXY='https://proxy.royaleapi.dev/v1';
 function getInitials(n){return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);}
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 function showTab(name,el){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');['members','donations','activity'].forEach(t=>{document.getElementById('tab-'+t).style.display=t===name?'block':'none';});}
@@ -132,11 +127,11 @@ async function searchClan(){
   const key=document.getElementById('api-key-input').value.trim();
   if(!raw){alert('Entre le tag de ton clan !');return;}
   if(!key){alert('Entre ta clé API !');return;}
-  const tag=encodeURIComponent(raw.startsWith('#')?raw:'#'+raw);
+  const tag=raw.startsWith('#')?raw:'#'+raw;
   showScreen('screen-loading');
   try{
-    const res=await fetch(PROXY+'/clans/'+tag,{headers:{'Authorization':'Bearer '+key}});
-    if(!res.ok){const msgs={401:'Clé API invalide.',403:'Clé API non autorisée. Vérifie que l\'IP 0.0.0.0 est configurée.',404:'Clan introuvable. Vérifie le tag.',429:'Trop de requêtes, réessaie dans quelques secondes.',503:'Serveurs indisponibles.'};throw new Error(msgs[res.status]||'Erreur '+res.status);}
+    const res=await fetch('/api/clan?tag='+encodeURIComponent(tag),{headers:{'x-api-key':key}});
+    if(!res.ok){const d=await res.json();throw new Error(d.error||'Erreur '+res.status);}
     const data=await res.json();render(data);showScreen('screen-dashboard');
   }catch(e){
     showScreen('screen-dashboard');

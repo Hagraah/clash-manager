@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#1a1a2e" />
   <title>Clash Manager</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -19,9 +18,8 @@
     label { font-size: 13px; color: #666; margin-bottom: 6px; display: block; }
     input[type="text"], input[type="password"] { width: 100%; padding: 10px 14px; font-size: 15px; border-radius: 8px; border: 1px solid #ddd; background: #fafafa; color: #1a1a1a; font-family: monospace; outline: none; }
     input:focus { border-color: #e63946; }
-    .search-btn { width: 100%; margin-top: 12px; padding: 13px; background: #e63946; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .search-btn { width: 100%; margin-top: 12px; padding: 13px; background: #e63946; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; }
     .search-btn:hover { background: #c1121f; }
-    .search-btn:disabled { background: #ccc; cursor: not-allowed; }
     .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
     .stat-card { background: #f8f8f8; border-radius: 8px; padding: 12px; text-align: center; }
     .stat-card .val { font-size: 22px; font-weight: 700; color: #1a1a1a; }
@@ -45,13 +43,12 @@
     .bar-track { height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden; }
     .bar-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
     .tabs { display: flex; gap: 4px; background: #e8e8e8; padding: 4px; border-radius: 10px; margin-bottom: 14px; }
-    .tab { flex: 1; padding: 8px 4px; text-align: center; font-size: 13px; font-weight: 500; color: #666; border-radius: 7px; cursor: pointer; border: none; background: none; transition: all 0.15s; }
+    .tab { flex: 1; padding: 8px 4px; text-align: center; font-size: 13px; font-weight: 500; color: #666; border-radius: 7px; cursor: pointer; border: none; background: none; }
     .tab.active { background: #fff; color: #1a1a1a; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     .alert { padding: 12px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; line-height: 1.5; }
     .alert-warn { background: #fff8e6; color: #7d4a00; border: 1px solid #ffc107; }
     .alert-info { background: #e8f4fd; color: #0c5460; border: 1px solid #bee5eb; }
     .back-btn { background: none; border: none; color: #888; font-size: 13px; cursor: pointer; padding: 0 0 16px; display: flex; align-items: center; gap: 4px; }
-    .back-btn:hover { color: #e63946; }
     .loading { text-align: center; padding: 60px 20px; color: #888; font-size: 14px; }
     .spinner { width: 36px; height: 36px; border: 3px solid #f0f0f0; border-top-color: #e63946; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -63,11 +60,9 @@
 <div class="app">
   <div class="header">
     <div class="header-icon">⚔️</div>
-    <div>
-      <h1>Clash Manager</h1>
-      <p>Gestion de clan Clash Royale</p>
-    </div>
+    <div><h1>Clash Manager</h1><p>Gestion de clan Clash Royale</p></div>
   </div>
+
   <div class="screen active" id="screen-login">
     <div style="padding-top:8px;">
       <div class="card">
@@ -76,19 +71,14 @@
         <label>Tag du clan</label>
         <input type="text" id="clan-tag-input" placeholder="#ABC123" maxlength="12" />
         <p style="font-size:11px;color:#aaa;margin-top:5px;">Trouve ton tag dans Clash Royale → Profil → Clan</p>
+        <label style="margin-top:12px;">Clé API (developer.clashroyale.com)</label>
+        <input type="password" id="api-key-input" placeholder="eyJ0eXAiOiJKV1Qi..." />
         <button class="search-btn" onclick="searchClan()">🔍 Rechercher le clan</button>
       </div>
-      <div class="card">
-        <p style="font-size:13px;font-weight:700;margin-bottom:8px;">🔑 Clé API</p>
-        <label>Ta clé obtenue sur developer.clashroyale.com</label>
-        <input type="password" id="api-key-input" placeholder="eyJ0eXAiOiJKV1Qi..." />
-        <p style="font-size:11px;color:#aaa;margin-top:5px;">Ta clé est sauvegardée uniquement dans ton appareil</p>
-      </div>
-      <div class="alert alert-info">
-        💡 Le tag commence toujours par <strong>#</strong>. Exemple : <strong>#2PGGCGUG</strong>
-      </div>
+      <div class="alert alert-info">💡 Le tag commence toujours par <strong>#</strong>. Exemple : <strong>#2PGGCGUG</strong></div>
     </div>
   </div>
+
   <div class="screen" id="screen-loading">
     <div class="loading">
       <div class="spinner"></div>
@@ -96,6 +86,7 @@
       <p style="font-size:12px;color:#aaa;">Récupération des données du clan</p>
     </div>
   </div>
+
   <div class="screen" id="screen-dashboard">
     <div style="padding-top:8px;">
       <div id="error-container"></div>
@@ -120,18 +111,9 @@
         <button class="tab" onclick="showTab('donations',this)">🎁 Dons</button>
         <button class="tab" onclick="showTab('activity',this)">📊 Activité</button>
       </div>
-      <div id="tab-members" class="card">
-        <p class="section-title">Membres du clan</p>
-        <div id="members-list"></div>
-      </div>
-      <div id="tab-donations" class="card" style="display:none;">
-        <p class="section-title">Top donateurs — saison en cours</p>
-        <div id="donations-list"></div>
-      </div>
-      <div id="tab-activity" class="card" style="display:none;">
-        <p class="section-title">Analyse d'activité</p>
-        <div id="activity-content"></div>
-      </div>
+      <div id="tab-members" class="card"><p class="section-title">Membres du clan</p><div id="members-list"></div></div>
+      <div id="tab-donations" class="card" style="display:none;"><p class="section-title">Top donateurs — saison en cours</p><div id="donations-list"></div></div>
+      <div id="tab-activity" class="card" style="display:none;"><p class="section-title">Analyse d'activité</p><div id="activity-content"></div></div>
       <button class="back-btn" onclick="goBack()">← Rechercher un autre clan</button>
     </div>
   </div>
@@ -139,6 +121,7 @@
 <script>
 const BG=['#e8f4fd','#eaf7ec','#fff8e6','#fdecea','#f0eafd','#e6faf5','#fef0e8'];
 const FG=['#1e40af','#166534','#7d4a00','#991b1b','#5b21b6','#065f46','#9a3412'];
+const PROXY='https://proxy.royaleapi.dev/v1';
 function getInitials(n){return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);}
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 function showTab(name,el){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');['members','donations','activity'].forEach(t=>{document.getElementById('tab-'+t).style.display=t===name?'block':'none';});}
@@ -152,7 +135,7 @@ async function searchClan(){
   const tag=encodeURIComponent(raw.startsWith('#')?raw:'#'+raw);
   showScreen('screen-loading');
   try{
-    const res=await fetch('https://api.clashroyale.com/v1/clans/'+tag,{headers:{'Authorization':'Bearer '+key}});
+    const res=await fetch(PROXY+'/clans/'+tag,{headers:{'Authorization':'Bearer '+key}});
     if(!res.ok){const msgs={401:'Clé API invalide.',403:'Clé API non autorisée. Vérifie que l\'IP 0.0.0.0 est configurée.',404:'Clan introuvable. Vérifie le tag.',429:'Trop de requêtes, réessaie dans quelques secondes.',503:'Serveurs indisponibles.'};throw new Error(msgs[res.status]||'Erreur '+res.status);}
     const data=await res.json();render(data);showScreen('screen-dashboard');
   }catch(e){
@@ -179,10 +162,10 @@ function render(d){
   document.getElementById('clan-war').textContent=d.warFrequency||'—';
   document.getElementById('clan-trophies').textContent=(d.requiredTrophies||0).toLocaleString();
   const members=(d.memberList||[]).sort((a,b)=>(b.trophies||0)-(a.trophies||0));
+  const colors=['#e63946','#e67e22','#3498db','#2ecc71','#9b59b6','#1abc9c','#e74c3c'];
   document.getElementById('members-list').innerHTML=members.map((m,i)=>{const ci=i%BG.length,[bc,bl]=roleBadge(m.role);return `<div class="member-row"><div class="avatar" style="background:${BG[ci]};color:${FG[ci]}">${getInitials(m.name)}</div><div class="member-info"><div class="member-name">${m.name}</div><span class="badge ${bc}">${bl}</span><span class="tag-pill" style="margin-left:4px;">Niv.${m.expLevel||'?'}</span></div><div class="member-score"><div class="pts">${(m.trophies||0).toLocaleString()}</div><div class="lbl">trophées</div></div></div>`;}).join('');
   const byDon=[...members].sort((a,b)=>(b.donations||0)-(a.donations||0));
   const maxD=byDon[0]?(byDon[0].donations||1):1;
-  const colors=['#e63946','#e67e22','#3498db','#2ecc71','#9b59b6','#1abc9c','#e74c3c'];
   document.getElementById('donations-list').innerHTML=byDon.map((m,i)=>{const ci=i%BG.length,pct=Math.round(((m.donations||0)/maxD)*100);return `<div class="bar-wrap"><div class="bar-label"><span style="display:flex;align-items:center;gap:6px;"><div class="avatar" style="width:22px;height:22px;font-size:9px;background:${BG[ci]};color:${FG[ci]}">${getInitials(m.name)}</div>${m.name}</span><span style="font-weight:700">${(m.donations||0).toLocaleString()} dons</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${colors[i%colors.length]}"></div></div></div>`;}).join('');
   const inactive=members.filter(m=>(m.donations||0)===0&&(m.donationsReceived||0)===0);
   const top=members[0]?(members[0].trophies||1):1;

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1a1a2e" />
+  <title>Clash Manager</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f4f4; color: #1a1a1a; }
+    .app { max-width: 480px; margin: 0 auto; min-height: 100vh; background: #f4f4f4; }
+    .header { background: #1a1a2e; color: #fff; padding: 16px 20px; display: flex; align-items: center; gap: 12px; }
+    .header-icon { width: 36px; height: 36px; background: #e63946; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .header h1 { font-size: 18px; font-weight: 600; color: #fff; }
+    .header p { font-size: 12px; color: rgba(255,255,255,0.6); }
+    .screen { display: none; padding: 16px; }
+    .screen.active { display: block; }
+    .card { background: #fff; border-radius: 12px; border: 1px solid #e8e8e8; padding: 16px; margin-bottom: 12px; }
+    label { font-size: 13px; color: #666; margin-bottom: 6px; display: block; }
+    input[type="text"], input[type="password"] { width: 100%; padding: 10px 14px; font-size: 15px; border-radius: 8px; border: 1px solid #ddd; background: #fafafa; color: #1a1a1a; font-family: monospace; outline: none; }
+    input:focus { border-color: #e63946; }
+    .search-btn { width: 100%; margin-top: 12px; padding: 13px; background: #e63946; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .search-btn:hover { background: #c1121f; }
+    .search-btn:disabled { background: #ccc; cursor: not-allowed; }
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .stat-card { background: #f8f8f8; border-radius: 8px; padding: 12px; text-align: center; }
+    .stat-card .val { font-size: 22px; font-weight: 700; color: #1a1a1a; }
+    .stat-card .lbl { font-size: 12px; color: #888; margin-top: 2px; }
+    .section-title { font-size: 12px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+    .member-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+    .member-row:last-child { border-bottom: none; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+    .member-info { flex: 1; min-width: 0; }
+    .member-name { font-size: 14px; font-weight: 600; color: #1a1a1a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .member-score { text-align: right; }
+    .member-score .pts { font-size: 14px; font-weight: 700; color: #1a1a1a; }
+    .member-score .lbl { font-size: 11px; color: #999; }
+    .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 600; margin-top: 2px; }
+    .badge-leader { background: #fff3cd; color: #856404; }
+    .badge-co { background: #faeeda; color: #7d4a00; }
+    .badge-elder { background: #dbeafe; color: #1e40af; }
+    .badge-member { background: #f0f0f0; color: #555; }
+    .bar-wrap { margin-bottom: 10px; }
+    .bar-label { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-bottom: 3px; }
+    .bar-track { height: 6px; background: #f0f0f0; border-radius: 3px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+    .tabs { display: flex; gap: 4px; background: #e8e8e8; padding: 4px; border-radius: 10px; margin-bottom: 14px; }
+    .tab { flex: 1; padding: 8px 4px; text-align: center; font-size: 13px; font-weight: 500; color: #666; border-radius: 7px; cursor: pointer; border: none; background: none; transition: all 0.15s; }
+    .tab.active { background: #fff; color: #1a1a1a; font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .alert { padding: 12px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 12px; line-height: 1.5; }
+    .alert-warn { background: #fff8e6; color: #7d4a00; border: 1px solid #ffc107; }
+    .alert-info { background: #e8f4fd; color: #0c5460; border: 1px solid #bee5eb; }
+    .back-btn { background: none; border: none; color: #888; font-size: 13px; cursor: pointer; padding: 0 0 16px; display: flex; align-items: center; gap: 4px; }
+    .back-btn:hover { color: #e63946; }
+    .loading { text-align: center; padding: 60px 20px; color: #888; font-size: 14px; }
+    .spinner { width: 36px; height: 36px; border: 3px solid #f0f0f0; border-top-color: #e63946; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error-box { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 10px; padding: 14px; color: #991b1b; font-size: 13px; margin-bottom: 12px; line-height: 1.5; }
+    .tag-pill { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; background: #f0f0f0; color: #666; border: 1px solid #e0e0e0; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-icon">⚔️</div>
+    <div>
+      <h1>Clash Manager</h1>
+      <p>Gestion de clan Clash Royale</p>
+    </div>
+  </div>
+  <div class="screen active" id="screen-login">
+    <div style="padding-top:8px;">
+      <div class="card">
+        <p style="font-size:15px;font-weight:700;margin-bottom:4px;">Rechercher un clan</p>
+        <p style="font-size:13px;color:#888;margin-bottom:16px;">Entre le tag de ton clan pour voir les statistiques</p>
+        <label>Tag du clan</label>
+        <input type="text" id="clan-tag-input" placeholder="#ABC123" maxlength="12" />
+        <p style="font-size:11px;color:#aaa;margin-top:5px;">Trouve ton tag dans Clash Royale → Profil → Clan</p>
+        <button class="search-btn" onclick="searchClan()">🔍 Rechercher le clan</button>
+      </div>
+      <div class="card">
+        <p style="font-size:13px;font-weight:700;margin-bottom:8px;">🔑 Clé API</p>
+        <label>Ta clé obtenue sur developer.clashroyale.com</label>
+        <input type="password" id="api-key-input" placeholder="eyJ0eXAiOiJKV1Qi..." />
+        <p style="font-size:11px;color:#aaa;margin-top:5px;">Ta clé est sauvegardée uniquement dans ton appareil</p>
+      </div>
+      <div class="alert alert-info">
+        💡 Le tag commence toujours par <strong>#</strong>. Exemple : <strong>#2PGGCGUG</strong>
+      </div>
+    </div>
+  </div>
+  <div class="screen" id="screen-loading">
+    <div class="loading">
+      <div class="spinner"></div>
+      <p style="font-weight:600;margin-bottom:6px;">Connexion aux serveurs...</p>
+      <p style="font-size:12px;color:#aaa;">Récupération des données du clan</p>
+    </div>
+  </div>
+  <div class="screen" id="screen-dashboard">
+    <div style="padding-top:8px;">
+      <div id="error-container"></div>
+      <div class="card" id="clan-header-card">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+          <div style="width:50px;height:50px;border-radius:50%;background:#e63946;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">⚔️</div>
+          <div>
+            <p style="font-size:18px;font-weight:700;" id="clan-name">—</p>
+            <p style="font-size:12px;color:#888;" id="clan-tag-display"></p>
+            <p style="font-size:12px;color:#aaa;margin-top:2px;" id="clan-desc"></p>
+          </div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="val" id="clan-score">—</div><div class="lbl">Score de clan</div></div>
+          <div class="stat-card"><div class="val" id="clan-members">—</div><div class="lbl">Membres</div></div>
+          <div class="stat-card"><div class="val" id="clan-war">—</div><div class="lbl">Guerres de clan</div></div>
+          <div class="stat-card"><div class="val" id="clan-trophies">—</div><div class="lbl">Trophées min.</div></div>
+        </div>
+      </div>
+      <div class="tabs" id="main-tabs">
+        <button class="tab active" onclick="showTab('members',this)">👥 Membres</button>
+        <button class="tab" onclick="showTab('donations',this)">🎁 Dons</button>
+        <button class="tab" onclick="showTab('activity',this)">📊 Activité</button>
+      </div>
+      <div id="tab-members" class="card">
+        <p class="section-title">Membres du clan</p>
+        <div id="members-list"></div>
+      </div>
+      <div id="tab-donations" class="card" style="display:none;">
+        <p class="section-title">Top donateurs — saison en cours</p>
+        <div id="donations-list"></div>
+      </div>
+      <div id="tab-activity" class="card" style="display:none;">
+        <p class="section-title">Analyse d'activité</p>
+        <div id="activity-content"></div>
+      </div>
+      <button class="back-btn" onclick="goBack()">← Rechercher un autre clan</button>
+    </div>
+  </div>
+</div>
+<script>
+const BG=['#e8f4fd','#eaf7ec','#fff8e6','#fdecea','#f0eafd','#e6faf5','#fef0e8'];
+const FG=['#1e40af','#166534','#7d4a00','#991b1b','#5b21b6','#065f46','#9a3412'];
+function getInitials(n){return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function showTab(name,el){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');['members','donations','activity'].forEach(t=>{document.getElementById('tab-'+t).style.display=t===name?'block':'none';});}
+function goBack(){showScreen('screen-login');}
+function roleBadge(role){const map={leader:['badge-leader','Chef 👑'],coLeader:['badge-co','Co-chef'],elder:['badge-elder','Ancien'],member:['badge-member','Membre']};return map[role]||['badge-member',role];}
+async function searchClan(){
+  const raw=document.getElementById('clan-tag-input').value.trim();
+  const key=document.getElementById('api-key-input').value.trim();
+  if(!raw){alert('Entre le tag de ton clan !');return;}
+  if(!key){alert('Entre ta clé API !');return;}
+  const tag=encodeURIComponent(raw.startsWith('#')?raw:'#'+raw);
+  showScreen('screen-loading');
+  try{
+    const res=await fetch('https://api.clashroyale.com/v1/clans/'+tag,{headers:{'Authorization':'Bearer '+key}});
+    if(!res.ok){const msgs={401:'Clé API invalide.',403:'Clé API non autorisée. Vérifie que l\'IP 0.0.0.0 est configurée.',404:'Clan introuvable. Vérifie le tag.',429:'Trop de requêtes, réessaie dans quelques secondes.',503:'Serveurs indisponibles.'};throw new Error(msgs[res.status]||'Erreur '+res.status);}
+    const data=await res.json();render(data);showScreen('screen-dashboard');
+  }catch(e){
+    showScreen('screen-dashboard');
+    document.getElementById('error-container').innerHTML='<div class="error-box">❌ <strong>Impossible de charger le clan</strong><br><br>'+e.message+'</div>';
+    document.getElementById('clan-header-card').style.display='none';
+    document.getElementById('main-tabs').style.display='none';
+    ['members','donations','activity'].forEach(t=>document.getElementById('tab-'+t).style.display='none');
+  }
+}
+function render(d){
+  document.getElementById('error-container').innerHTML='';
+  document.getElementById('clan-header-card').style.display='block';
+  document.getElementById('main-tabs').style.display='flex';
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===0));
+  document.getElementById('tab-members').style.display='block';
+  document.getElementById('tab-donations').style.display='none';
+  document.getElementById('tab-activity').style.display='none';
+  document.getElementById('clan-name').textContent=d.name||'—';
+  document.getElementById('clan-tag-display').textContent=d.tag||'';
+  document.getElementById('clan-desc').textContent=(d.description||'').slice(0,80)+(d.description&&d.description.length>80?'…':'');
+  document.getElementById('clan-score').textContent=(d.clanScore||d.clanWarTrophies||0).toLocaleString();
+  document.getElementById('clan-members').textContent=(d.members||0)+'/50';
+  document.getElementById('clan-war').textContent=d.warFrequency||'—';
+  document.getElementById('clan-trophies').textContent=(d.requiredTrophies||0).toLocaleString();
+  const members=(d.memberList||[]).sort((a,b)=>(b.trophies||0)-(a.trophies||0));
+  document.getElementById('members-list').innerHTML=members.map((m,i)=>{const ci=i%BG.length,[bc,bl]=roleBadge(m.role);return `<div class="member-row"><div class="avatar" style="background:${BG[ci]};color:${FG[ci]}">${getInitials(m.name)}</div><div class="member-info"><div class="member-name">${m.name}</div><span class="badge ${bc}">${bl}</span><span class="tag-pill" style="margin-left:4px;">Niv.${m.expLevel||'?'}</span></div><div class="member-score"><div class="pts">${(m.trophies||0).toLocaleString()}</div><div class="lbl">trophées</div></div></div>`;}).join('');
+  const byDon=[...members].sort((a,b)=>(b.donations||0)-(a.donations||0));
+  const maxD=byDon[0]?(byDon[0].donations||1):1;
+  const colors=['#e63946','#e67e22','#3498db','#2ecc71','#9b59b6','#1abc9c','#e74c3c'];
+  document.getElementById('donations-list').innerHTML=byDon.map((m,i)=>{const ci=i%BG.length,pct=Math.round(((m.donations||0)/maxD)*100);return `<div class="bar-wrap"><div class="bar-label"><span style="display:flex;align-items:center;gap:6px;"><div class="avatar" style="width:22px;height:22px;font-size:9px;background:${BG[ci]};color:${FG[ci]}">${getInitials(m.name)}</div>${m.name}</span><span style="font-weight:700">${(m.donations||0).toLocaleString()} dons</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${colors[i%colors.length]}"></div></div></div>`;}).join('');
+  const inactive=members.filter(m=>(m.donations||0)===0&&(m.donationsReceived||0)===0);
+  const top=members[0]?(members[0].trophies||1):1;
+  document.getElementById('activity-content').innerHTML=`<div class="alert alert-warn" style="margin-bottom:14px;">⚠️ L'API fournit les données de la <strong>saison en cours</strong> uniquement.</div><p class="section-title" style="margin-bottom:10px;">Trophées actuels (top 15)</p>${members.slice(0,15).map((m,i)=>{const pct=Math.round(((m.trophies||0)/top)*100);return `<div class="bar-wrap"><div class="bar-label"><span>${m.name}</span><span>${(m.trophies||0).toLocaleString()}</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${colors[i%colors.length]}"></div></div></div>`;}).join('')}${inactive.length>0?`<p class="section-title" style="margin-top:18px;margin-bottom:8px;">⚠️ Membres inactifs (${inactive.length})</p>${inactive.map(m=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f5f5f5;"><span style="font-size:13px;">${m.name}</span><span style="font-size:11px;color:#e63946;font-weight:700;">INACTIF</span></div>`).join('')}`:'<p style="font-size:13px;color:#4caf50;margin-top:14px;font-weight:600;">✅ Tous les membres ont été actifs !</p>'}`;
+}
+</script>
+</body>
+</html>
